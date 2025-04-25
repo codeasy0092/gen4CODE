@@ -1,0 +1,2506 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bharat Visual History - Interactive Timeline of Indian History</title>
+    <meta name="description" content="Interactive visualization of Indian history from Indus Valley to modern times with timelines, maps, and historical data">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+    --saffron: #FF9933;
+    --green: #138808;
+    --blue: #000080;
+    --cream: #FFF8E1;
+    --brown: #5D4037;
+    --light-brown: #8D6E63;
+    --gold: #FFD700;
+    --maroon: #800000;
+    --indigo: #4B0082;
+    --turmeric: #C68C53;
+    --henna: #B54036;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Poppins', sans-serif;
+    line-height: 1.6;
+    color: #333;
+    background-color: var(--cream);
+    background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100"><path fill="%23FF993322" d="M50 0C22.4 0 0 22.4 0 50s22.4 50 50 50 50-22.4 50-50S77.6 0 50 0zm0 90c-22.1 0-40-17.9-40-40S27.9 10 50 10s40 17.9 40 40-17.9 40-40 40z"/></svg>');
+    background-size: 60px 60px;
+    overflow-x: hidden;
+}
+
+h1, h2, h3, h4 {
+    font-family: 'Playfair Display', serif;
+    font-weight: 700;
+    color:white;
+}
+
+/* Accessibility Focus Styles */
+:focus {
+    outline: 3px solid var(--blue);
+    outline-offset: 2px;
+}
+
+/* Header Styles */
+header {
+    background: linear-gradient(135deg, var(--saffron), var(--green));
+    color: white;
+    padding: 1rem;
+    text-align: center;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    position: relative;
+    z-index: 100;
+    border-bottom: 4px solid var(--blue);
+}
+
+.header-content {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+    position: relative;
+    overflow: hidden;
+}
+
+.header-content::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100"><path fill="%23FFFFFF22" d="M30,50 C30,50 40,30 50,30 C60,30 70,50 70,50 C70,50 60,70 50,70 C40,70 30,50 30,50 Z"/></svg>');
+    background-size: 80px 80px;
+    opacity: 0.2;
+    pointer-events: none;
+}
+
+.logo {
+    font-size: 2.2rem;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+    position: relative;
+    z-index: 1;
+}
+
+.logo-icon {
+    width: 50px;
+    height: 50px;
+    filter: drop-shadow(2px 2px 4px rgba(0, 0, 0, 0.3));
+}
+
+.tagline {
+    font-size: 1.1rem;
+    max-width: 800px;
+    position: relative;
+    z-index: 1;
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+/* Navigation */
+nav {
+    width: 100%;
+    background-color: var(--blue);
+    padding: 0.5rem 1rem;
+    position: sticky;
+    top: 0;
+    z-index: 90;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+}
+
+.nav-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.link-page{
+    max-width: 1200px;
+    margin: 0 auto;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: center;
+    margin-left: 20px;
+    margin-right: 20px;
+}
+.nav-menu {
+    display: flex;
+    list-style: none;
+    gap: 1.5rem;
+}
+
+.nav-menu li a {
+    color: white;
+    text-decoration: none;
+    padding: 0.5rem 1rem;
+    border-radius: 4px;
+    transition: all 0.3s;
+    position: relative;
+    font-weight: 500;
+}
+
+.nav-menu li a::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    width: 0;
+    height: 2px;
+    background-color: var(--saffron);
+    transition: all 0.3s;
+    transform: translateX(-50%);
+}
+
+.nav-menu li a:hover, 
+.nav-menu li a:focus {
+    color: var(--saffron);
+}
+
+.nav-menu li a:hover::after,
+.nav-menu li a:focus::after {
+    width: 100%;
+}
+
+.search-compare {
+    display: flex;
+    gap: 1rem;
+}
+
+.search-box {
+    padding: 0.5rem 1rem;
+    border: none;
+    border-radius: 25px;
+    min-width: 200px;
+    font-family: inherit;
+    background-color: rgba(255, 255, 255, 0.9);
+    box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s;
+}
+
+.search-box:focus {
+    background-color: white;
+    box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.2), 0 0 0 3px rgba(255, 153, 51, 0.3);
+}
+
+.compare-btn {
+    background-color: var(--saffron);
+    color: var(--blue);
+    border: none;
+    padding: 0.5rem 1.5rem;
+    border-radius: 25px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: all 0.3s;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.compare-btn:hover, 
+.compare-btn:focus {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    background-color: #ff8c1a;
+}
+
+.mobile-menu-btn {
+    display: none;
+    background: none;
+    border: none;
+    color: white;
+    font-size: 1.8rem;
+    cursor: pointer;
+    padding: 0.5rem;
+    transition: transform 0.3s;
+}
+
+.mobile-menu-btn:hover {
+    transform: rotate(90deg);
+}
+
+/* Main Content Layout */
+main {
+    max-width: 1200px;
+    margin: 2rem auto;
+    padding: 0 1rem;
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 3rem;
+}
+
+/* Decorative elements */
+.section-divider {
+    height: 4px;
+    background: linear-gradient(90deg, var(--saffron), var(--green), var(--blue));
+    margin: 2rem 0;
+    border-radius: 2px;
+    position: relative;
+}
+
+.section-divider::before {
+    content: "";
+    position: absolute;
+    top: -10px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 20px;
+    height: 20px;
+    background-color: var(--blue);
+    border-radius: 50%;
+    border: 4px solid var(--cream);
+}
+
+/* Timeline Section */
+.timeline-section {
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    padding: 2rem;
+    overflow: hidden;
+    position: relative;
+    border: 1px solid rgba(139, 69, 19, 0.2);
+}
+
+.timeline-section::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 100px;
+    height: 100px;
+    background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><path fill="%235D403722" d="M50 0C22.4 0 0 22.4 0 50s22.4 50 50 50 50-22.4 50-50S77.6 0 50 0zm0 90c-22.1 0-40-17.9-40-40S27.9 10 50 10s40 17.9 40 40-17.9 40-40 40z"/></svg>');
+    background-size: contain;
+    background-repeat: no-repeat;
+    opacity: 0.1;
+    z-index: 0;
+}
+
+.section-title {
+    color: var(--indigo);
+    margin-bottom: 1.5rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 2px solid var(--saffron);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: relative;
+    z-index: 1;
+}
+
+.section-title::after {
+    content: "✧";
+    color: var(--saffron);
+    margin-left: 1rem;
+}
+
+.timeline-container {
+    position: relative;
+    height: 150px;
+    margin: 2rem 0;
+    overflow-x: auto;
+    overflow-y: hidden;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: thin;
+    scrollbar-color: var(--saffron) var(--cream);
+    padding: 20px 0;
+}
+
+.timeline-container::-webkit-scrollbar {
+    height: 8px;
+}
+
+.timeline-container::-webkit-scrollbar-track {
+    background: var(--cream);
+    border-radius: 4px;
+}
+
+.timeline-container::-webkit-scrollbar-thumb {
+    background-color: var(--saffron);
+    border-radius: 20px;
+    background-image: linear-gradient(to right, var(--saffron), var(--henna));
+}
+
+.timeline-scroll {
+    position: absolute;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    padding: 0 50px;
+    gap: 30px;
+}
+
+.timeline-item {
+    position: relative;
+    height: 100px;
+    min-width: 180px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    transition: all 0.3s;
+    border-radius: 8px;
+    padding: 1rem;
+    background-color: white;
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+    border-top: 4px solid;
+    z-index: 1;
+}
+
+.timeline-item:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
+}
+
+.timeline-item::before {
+    content: "";
+    position: absolute;
+    bottom: -15px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 0;
+    height: 0;
+    border-left: 15px solid transparent;
+    border-right: 15px solid transparent;
+    border-top: 15px solid white;
+    opacity: 0;
+    transition: opacity 0.3s;
+    filter: drop-shadow(0 2px 2px rgba(0, 0, 0, 0.1));
+}
+
+.timeline-item::after {
+    content: "";
+    position: absolute;
+    top: -10px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 30px;
+    height: 30px;
+    background-color: inherit;
+    border-radius: 50%;
+    border: 3px solid white;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    z-index: -1;
+}
+
+.timeline-item.active {
+    transform: scale(1.05);
+    z-index: 10;
+    animation: pulse 2s infinite;
+}
+
+.timeline-item.active::before {
+    opacity: 1;
+}
+
+.timeline-period {
+    font-weight: bold;
+    margin-bottom: 0.5rem;
+    text-align: center;
+    font-size: 1.1rem;
+    color: var(--indigo);
+}
+
+.timeline-years {
+    font-size: 0.9rem;
+    color: var(--light-brown);
+    font-weight: 500;
+}
+
+/* Period Cards Section */
+.period-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 2rem;
+    margin-top: 2rem;
+}
+
+.period-card {
+    background-color: white;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    border: 1px solid rgba(139, 69, 19, 0.2);
+}
+
+.period-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+}
+
+.period-card::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 5px;
+    background: linear-gradient(90deg, var(--saffron), var(--green), var(--blue));
+}
+
+.card-header {
+    padding: 1.5rem;
+    color: white;
+    position: relative;
+    overflow: hidden;
+    min-height: 120px;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    background-size: cover;
+    background-position: center;
+}
+
+.card-header::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(to bottom, transparent, rgba(0,0,0,0.7));
+    z-index: 0;
+}
+
+.card-title {
+    font-size: 1.5rem;
+    margin-bottom: 0.5rem;
+    text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.8);
+    position: relative;
+    z-index: 1;
+}
+
+.card-years {
+    font-size: 1rem;
+    opacity: 0.9;
+    font-weight: 500;
+    position: relative;
+    z-index: 1;
+    color: white;
+}
+
+.card-body {
+    padding: 1.5rem;
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+}
+
+.card-body::before {
+    content: "";
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    width: 60px;
+    height: 60px;
+    background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><path fill="%238D6E6311" d="M50 0C22.4 0 0 22.4 0 50s22.4 50 50 50 50-22.4 50-50S77.6 0 50 0zm0 90c-22.1 0-40-17.9-40-40S27.9 10 50 10s40 17.9 40 40-17.9 40-40 40z"/></svg>');
+    background-size: contain;
+    background-repeat: no-repeat;
+    opacity: 0.5;
+    z-index: 0;
+}
+
+.card-rulers {
+    margin: 1rem 0;
+    font-size: 1rem;
+    position: relative;
+    z-index: 1;
+}
+
+.card-rulers strong {
+    display: block;
+    margin-bottom: 0.5rem;
+    color: var(--indigo);
+}
+
+.card-rulers span {
+    display: inline-block;
+    background-color: var(--cream);
+    padding: 0.3rem 0.8rem;
+    border-radius: 20px;
+    margin-right: 0.5rem;
+    margin-bottom: 0.5rem;
+    font-size: 0.9rem;
+    box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
+    border: 1px solid rgba(139, 69, 19, 0.1);
+}
+
+.card-achievements {
+    margin: 1rem 0;
+    font-size: 1rem;
+    flex-grow: 1;
+    position: relative;
+    z-index: 1;
+}
+
+.card-achievements strong {
+    display: block;
+    margin-bottom: 0.5rem;
+    color: var(--indigo);
+}
+
+.card-achievements ul {
+    padding-left: 1.5rem;
+    list-style-type: none;
+}
+
+.card-achievements li {
+    margin-bottom: 0.5rem;
+    position: relative;
+}
+
+.card-achievements li::before {
+    content: "•";
+    color: var(--saffron);
+    font-weight: bold;
+    display: inline-block;
+    width: 1em;
+    margin-left: -1em;
+}
+
+.card-map {
+    height: 180px;
+    margin-top: 1.5rem;
+    background-color: #f5f5f5;
+    border-radius: 6px;
+    overflow: hidden;
+    position: relative;
+    border: 1px solid rgba(139, 69, 19, 0.2);
+}
+
+/* Map Visualization Section */
+.map-section {
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    padding: 2rem;
+    position: relative;
+    border: 1px solid rgba(139, 69, 19, 0.2);
+}
+
+#history-map {
+    height: 550px;
+    width: 100%;
+    border-radius: 8px;
+    margin-top: 1.5rem;
+    border: 1px solid rgba(139, 69, 19, 0.3);
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+    z-index: 1;
+}
+
+.map-controls {
+    display: flex;
+    gap: 1rem;
+    margin-top: 1.5rem;
+    flex-wrap: wrap;
+    align-items: center;
+}
+
+.map-btn {
+    background-color: var(--blue);
+    color: white;
+    border: none;
+    padding: 0.7rem 1.5rem;
+    border-radius: 30px;
+    cursor: pointer;
+    transition: all 0.3s;
+    font-family: inherit;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.map-btn::before {
+    content: "";
+    display: inline-block;
+    width: 16px;
+    height: 16px;
+    background-color: currentColor;
+    border-radius: 2px;
+}
+
+.map-btn[data-layer="battles"]::before {
+    background-color: transparent;
+    border: 2px solid currentColor;
+}
+
+.map-btn:hover, 
+.map-btn:focus {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.map-btn.active {
+    background-color: var(--saffron);
+    color: var(--blue);
+    font-weight: bold;
+}
+
+.filter-select {
+    padding: 0.7rem 1rem;
+    border: 1px solid #ddd;
+    border-radius: 30px;
+    min-width: 200px;
+    font-family: inherit;
+    background-color: white;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s;
+    appearance: none;
+    background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: right 1rem center;
+    background-size: 1rem;
+}
+
+.filter-select:focus {
+    border-color: var(--saffron);
+    box-shadow: 0 0 0 3px rgba(255, 153, 51, 0.3);
+    outline: none;
+}
+
+/* Key Events Section */
+.events-section {
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    padding: 2rem;
+    position: relative;
+    border: 1px solid rgba(139, 69, 19, 0.2);
+}
+
+.event-filters {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+    flex-wrap: wrap;
+    align-items: center;
+}
+
+.events-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 2rem;
+    margin-top: 1.5rem;
+}
+
+.event-card {
+    background-color: white;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s;
+    border: 1px solid rgba(139, 69, 19, 0.2);
+    display: flex;
+    flex-direction: column;
+}
+
+.event-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+}
+
+.event-image-container {
+    height: 200px;
+    overflow: hidden;
+    position: relative;
+}
+
+.event-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.5s;
+}
+
+.event-card:hover .event-image {
+    transform: scale(1.05);
+}
+
+.event-period {
+    position: absolute;
+    top: 1rem;
+    left: 1rem;
+    background-color: rgba(0, 0, 0, 0.7);
+    color: white;
+    padding: 0.3rem 0.8rem;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    z-index: 1;
+}
+
+.event-content {
+    padding: 1.5rem;
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.event-date {
+    color: var(--light-brown);
+    font-size: 0.9rem;
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+}
+
+.event-title {
+    font-size: 1.3rem;
+    margin-bottom: 1rem;
+    color: var(--indigo);
+}
+
+.event-desc {
+    font-size: 1rem;
+    margin-bottom: 1.5rem;
+    flex-grow: 1;
+}
+
+.learn-more {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--saffron);
+    text-decoration: none;
+    font-weight: bold;
+    font-size: 1rem;
+    transition: all 0.3s;
+    align-self: flex-start;
+}
+
+.learn-more:hover, 
+.learn-more:focus {
+    color: var(--blue);
+    gap: 0.8rem;
+}
+
+/* Footer */
+footer {
+    background-color: var(--blue);
+    color: white;
+    padding: 3rem 1rem 2rem;
+    margin-top: 4rem;
+    position: relative;
+}
+
+footer::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 10px;
+    background: linear-gradient(90deg, var(--saffron), var(--green), var(--blue));
+}
+
+.footer-content {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 3rem;
+    text-align: left;
+}
+
+.footer-column h3 {
+    margin-bottom: 1.5rem;
+    color: var(--saffron);
+    font-size: 1.3rem;
+    position: relative;
+    display: inline-block;
+}
+
+.footer-column h3::after {
+    content: "";
+    position: absolute;
+    bottom: -5px;
+    left: 0;
+    width: 50px;
+    height: 2px;
+    background-color: var(--saffron);
+}
+
+.footer-links {
+    list-style: none;
+}
+
+.footer-links li {
+    margin-bottom: 0.8rem;
+}
+
+.footer-links a {
+    color: white;
+    text-decoration: none;
+    transition: all 0.3s;
+    display: inline-block;
+    padding: 0.2rem 0;
+    position: relative;
+}
+
+.footer-links a::after {
+    content: "";
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 0;
+    height: 1px;
+    background-color: var(--saffron);
+    transition: width 0.3s;
+}
+
+.footer-links a:hover, 
+.footer-links a:focus {
+    color: var(--saffron);
+}
+
+.footer-links a:hover::after,
+.footer-links a:focus::after {
+    width: 100%;
+}
+
+.social-links {
+    display: flex;
+    gap: 1rem;
+    margin-top: 1.5rem;
+}
+
+.social-link {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background-color: rgba(255, 255, 255, 0.1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s;
+}
+
+.social-link:hover, 
+.social-link:focus {
+    background-color: var(--saffron);
+    transform: translateY(-3px);
+}
+
+.copyright {
+    margin-top: 3rem;
+    padding-top: 2rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    text-align: center;
+    font-size: 0.9rem;
+    opacity: 0.8;
+}
+
+/* Modal for Comparison */
+.modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.7);
+    z-index: 1000;
+    overflow-y: auto;
+    backdrop-filter: blur(5px);
+}
+
+.modal-content {
+    background-color: white;
+    margin: 2rem auto;
+    max-width: 900px;
+    width: 90%;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    animation: modalFadeIn 0.3s;
+    border: 1px solid rgba(139, 69, 19, 0.3);
+}
+
+@keyframes modalFadeIn {
+    from { opacity: 0; transform: translateY(-20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.modal-header {
+    background: linear-gradient(135deg, var(--saffron), var(--green));
+    color: white;
+    padding: 1.5rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: relative;
+    overflow: hidden;
+}
+
+.modal-header::before {
+    content: "";
+    position: absolute;
+    top: -50px;
+    right: -50px;
+    width: 100px;
+    height: 100px;
+    background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><path fill="%23FFFFFF22" d="M50 0C22.4 0 0 22.4 0 50s22.4 50 50 50 50-22.4 50-50S77.6 0 50 0zm0 90c-22.1 0-40-17.9-40-40S27.9 10 50 10s40 17.9 40 40-17.9 40-40 40z"/></svg>');
+    background-size: contain;
+    background-repeat: no-repeat;
+    opacity: 0.3;
+}
+
+.modal-title {
+    font-size: 1.8rem;
+    margin: 0;
+    position: relative;
+    z-index: 1;
+}
+
+.close-modal {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 2rem;
+    cursor: pointer;
+    padding: 0.5rem;
+    transition: transform 0.3s;
+    position: relative;
+    z-index: 1;
+}
+
+.close-modal:hover {
+    transform: rotate(90deg);
+}
+
+.modal-body {
+    padding: 2rem;
+}
+
+.comparison-controls {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 2rem;
+    flex-wrap: wrap;
+}
+
+.comparison-controls select {
+    flex: 1;
+    min-width: 200px;
+    padding: 0.8rem 1rem;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    font-family: inherit;
+}
+
+.comparison-controls button {
+    background-color: var(--blue);
+    color: white;
+    border: none;
+    padding: 0.8rem 2rem;
+    border-radius: 6px;
+    cursor: pointer;
+    font-family: inherit;
+    font-weight: bold;
+    transition: all 0.3s;
+}
+
+.comparison-controls button:hover {
+    background-color: var(--indigo);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.comparison-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+}
+
+.comparison-card {
+    border: 1px solid #eee;
+    border-radius: 8px;
+    padding: 1.5rem;
+    background-color: white;
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.05);
+    position: relative;
+    overflow: hidden;
+}
+
+.comparison-card::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 5px;
+}
+
+.comparison-card:nth-child(1)::before {
+    background-color: var(--saffron);
+}
+
+.comparison-card:nth-child(2)::before {
+    background-color: var(--green);
+}
+
+.comparison-title {
+    color: var(--indigo);
+    margin-bottom: 1.5rem;
+    text-align: center;
+    font-size: 1.5rem;
+    position: relative;
+    padding-bottom: 0.5rem;
+}
+
+.comparison-title::after {
+    content: "";
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 50px;
+    height: 2px;
+}
+
+.comparison-card:nth-child(1) .comparison-title::after {
+    background-color: var(--saffron);
+}
+
+.comparison-card:nth-child(2) .comparison-title::after {
+    background-color: var(--green);
+}
+
+.comparison-feature {
+    margin-bottom: 1rem;
+}
+
+.comparison-feature strong {
+    display: block;
+    margin-bottom: 0.3rem;
+    color: var(--indigo);
+}
+
+/* Tooltip for timeline items */
+.tooltip {
+    position: absolute;
+    background-color: rgba(0, 0, 0, 0.8);
+    color: white;
+    padding: 0.5rem 1rem;
+    border-radius: 6px;
+    font-size: 0.9rem;
+    pointer-events: none;
+    z-index: 100;
+    opacity: 0;
+    transition: opacity 0.3s;
+    max-width: 250px;
+    text-align: center;
+}
+
+.tooltip::after {
+    content: "";
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    border-width: 6px;
+    border-style: solid;
+    border-color: rgba(0, 0, 0, 0.8) transparent transparent transparent;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .nav-menu {
+        display: none;
+        width: 100%;
+        flex-direction: column;
+        gap: 0.5rem;
+        padding: 1rem 0;
+        background-color: var(--blue);
+        margin-top: 1rem;
+    }
+
+    .nav-menu.active {
+        display: flex;
+    }
+
+    .mobile-menu-btn {
+        display: block;
+    }
+
+    .search-compare {
+        width: 100%;
+        margin-top: 1rem;
+        flex-direction: column;
+    }
+
+    .search-box, .filter-select {
+        width: 100%;
+    }
+
+    .comparison-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .period-cards, .events-grid {
+        grid-template-columns: 1fr;
+    }
+
+    #history-map {
+        height: 400px;
+    }
+
+    .timeline-item {
+        min-width: 160px;
+        height: 90px;
+    }
+}
+
+@media (min-width: 769px) and (max-width: 1024px) {
+    .period-cards, .events-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+/* Animation for cards */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.period-card, .event-card {
+    animation: fadeInUp 0.5s ease-out forwards;
+    opacity: 0;
+}
+
+/* Delay animations for staggered effect */
+.period-card:nth-child(1) { animation-delay: 0.1s; }
+.period-card:nth-child(2) { animation-delay: 0.2s; }
+.period-card:nth-child(3) { animation-delay: 0.3s; }
+.period-card:nth-child(4) { animation-delay: 0.4s; }
+.period-card:nth-child(5) { animation-delay: 0.5s; }
+
+/* Loading animation */
+.loader {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(255, 255, 255, 0.8);
+    z-index: 9999;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+}
+
+.loader.active {
+    display: flex;
+}
+
+.loader-spinner {
+    width: 50px;
+    height: 50px;
+    border: 5px solid var(--cream);
+    border-top: 5px solid var(--saffron);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+.loader-text {
+    margin-top: 1rem;
+    color: var(--indigo);
+    font-weight: bold;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* New Animations */
+@keyframes pulse {
+    0% { transform: scale(1); box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1); }
+    50% { transform: scale(1.05); box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2); }
+    100% { transform: scale(1); box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1); }
+}
+
+@keyframes float {
+    0% { transform: translateY(0px); }
+    50% { transform: translateY(-10px); }
+    100% { transform: translateY(0px); }
+}
+
+.battle-marker {
+    animation: float 3s ease-in-out infinite;
+    font-size: 24px !important;
+    text-shadow: 0 0 10px rgba(255, 255, 255, 0.8);
+}
+
+/* Map Territory Styles */
+.territory-highlight {
+    fill-opacity: 0.5;
+    stroke-width: 2;
+    stroke-opacity: 1;
+    transition: fill-opacity 0.3s, stroke-width 0.3s;
+}
+
+.territory-highlight:hover {
+    fill-opacity: 0.7;
+    stroke-width: 3;
+}
+</style>
+</head>
+<body>
+    <!-- Loading Screen -->
+    <div class="loader" id="loader">
+        <div class="loader-spinner"></div>
+        <div class="loader-text">Loading Indian History...</div>
+    </div>
+
+    <header>
+        <div class="header-content">
+            <div class="logo">
+                <svg class="logo-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M12 2C6.48 2 2 6.48 2 12C2 17.52 6.48 22 12 22C17.52 22 22 17.52 22 12C22 6.48 17.52 2 12 2ZM12 20C7.59 20 4 16.41 4 12C4 7.59 7.59 4 12 4C16.41 4 20 7.59 20 12C20 16.41 16.41 20 12 20Z" fill="white"/>
+                    <path d="M12 6C8.69 6 6 8.69 6 12C6 15.31 8.69 18 12 18C15.31 18 18 15.31 18 12C18 8.69 15.31 6 12 6ZM12 16C9.79 16 8 14.21 8 12C8 9.79 9.79 8 12 8C14.21 8 16 9.79 16 12C16 14.21 14.21 16 12 16Z" fill="white"/>
+                    <path d="M12 10C10.9 10 10 10.9 10 12C10 13.1 10.9 14 12 14C13.1 14 14 13.1 14 12C14 10.9 13.1 10 12 10Z" fill="white"/>
+                </svg>
+                <span>Bharat Visual History</span>
+            </div>
+            <p class="tagline">Explore 5000 years of Indian civilization through interactive timelines and maps</p>
+        </div>
+        <nav>
+            <div class="nav-container">
+                <button class="mobile-menu-btn" aria-expanded="false" aria-label="Toggle menu">☰</button>
+                <ul class="nav-menu">
+                    <li><a href="#timeline" aria-current="page">Timeline</a></li>
+                    <li><a href="#periods">Historical Periods</a></li>
+                    <li><a href="#map">Geographical View</a></li>
+                    <li><a href="#events">Key Events</a></li>
+                    <li><a href="#about">About</a></li>
+                </ul>
+                <div class="search-compare">
+                    <input type="text" class="search-box" placeholder="Search historical events..." aria-label="Search historical events">
+                    <button class="compare-btn" id="compareBtn">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M10 3H3V10H10V3Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            <path d="M21 3H14V10H21V3Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            <path d="M21 14H14V21H21V14Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            <path d="M10 14H3V21H10V14Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                        Compare Periods
+                    </button>
+                </div>
+                <div class="link-page">
+                    <ul><a href="indus.html"><button>Indus Valley</button></a></ul>
+                    <ul><a href="vedic.html"><button>Vedic Age</button></a></ul>
+                    <ul><a href="maurya.html"><button>Maurya Dynasty</button></a></ul>
+                    <ul><a href="gupta.html"><button>Gupta Empire</button></a></ul>
+                    <ul><a href="chola.html"><button>Chola Dynasty</button></a></ul>
+                    <ul><a href="Delhi Sultanate.html"><button>Delhi Sultanate</button></a></ul>
+                    <ul><a href="vijaynagara.html"><button>vijayanagara kingdom</button></a></ul>
+                    <ul><a href="mughal.html"><button>Mughal Dynasty</button></a></ul>
+                    <ul><a href="maratha.html"><button>Maratha Empire</button></a></ul>
+                    <ul><a href="british.html"><button>British Raj</button></a></ul>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <main>
+        <!-- Interactive Timeline Section -->
+        <section class="timeline-section" id="timeline" aria-labelledby="timeline-heading">
+            <h2 class="section-title" id="timeline-heading">Interactive Timeline of Indian History</h2>
+            <p>Scroll horizontally to explore different eras of Indian history. Click on any period to learn more.</p>
+            
+            <div class="timeline-container" tabindex="0" aria-label="Interactive timeline of Indian history">
+                <div class="timeline-scroll" id="timelineScroll">
+                    <!-- Timeline items will be added dynamically with JavaScript -->
+                </div>
+            </div>
+            <div class="tooltip" id="timelineTooltip"></div>
+        </section>
+
+        <div class="section-divider"></div>
+
+        <!-- Period Cards Section -->
+        <section class="timeline-section" id="periods" aria-labelledby="periods-heading">
+            <h2 class="section-title" id="periods-heading">Major Historical Periods</h2>
+            <p>Explore the most significant dynasties and empires that shaped Indian history.</p>
+            
+            <div class="period-cards" id="periodCards">
+                <!-- Period cards will be added dynamically with JavaScript -->
+            </div>
+        </section>
+
+        <div class="section-divider"></div>
+
+        <!-- Map Visualization Section -->
+        <section class="map-section" id="map" aria-labelledby="map-heading">
+            <h2 class="section-title" id="map-heading">Geographical Visualization</h2>
+            <p>See how India's borders changed through different historical periods.</p>
+            
+            <div id="history-map" aria-label="Interactive map of Indian historical borders"></div>
+            
+            <div class="map-controls">
+                <button class="map-btn active" data-layer="borders">
+                    Borders
+                </button>
+                <button class="map-btn" data-layer="battles">
+                    Battles
+                </button>
+                <select class="filter-select" id="eraSelect" aria-label="Select historical era for map">
+                    <option value="all">All Eras</option>
+                    <!-- Era options will be added dynamically -->
+                </select>
+            </div>
+        </section>
+
+        <div class="section-divider"></div>
+
+        <!-- Key Events Section -->
+        <section class="events-section" id="events" aria-labelledby="events-heading">
+            <h2 class="section-title" id="events-heading">Key Historical Events</h2>
+            <p>Important events that shaped the course of Indian history.</p>
+            
+            <div class="event-filters">
+                <select class="filter-select" id="eventEraFilter" aria-label="Filter events by historical period">
+                    <option value="all">All Periods</option>
+                    <!-- Period options will be added dynamically -->
+                </select>
+                <select class="filter-select" id="eventTypeFilter" aria-label="Filter events by type">
+                    <option value="all">All Types</option>
+                    <option value="political">Political</option>
+                    <option value="cultural">Cultural</option>
+                    <option value="religious">Religious</option>
+                    <option value="military">Military</option>
+                </select>
+                <input type="text" class="filter-select" id="eventSearch" placeholder="Search events..." aria-label="Search historical events">
+            </div>
+            
+            <div class="events-grid" id="eventsGrid">
+                <!-- Event cards will be added dynamically with JavaScript -->
+            </div>
+        </section>
+    </main>
+
+    <!-- Comparison Modal -->
+    <div class="modal" id="comparisonModal" role="dialog" aria-labelledby="modalTitle" aria-modal="true">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title" id="modalTitle">Compare Historical Periods</h3>
+                <button class="close-modal" aria-label="Close comparison modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="comparison-controls">
+                    <select id="comparePeriod1" aria-label="Select first period to compare">
+                        <!-- Options will be added dynamically -->
+                    </select>
+                    <select id="comparePeriod2" aria-label="Select second period to compare">
+                        <!-- Options will be added dynamically -->
+                    </select>
+                    <button id="compareSubmit">Compare</button>
+                </div>
+                <div class="comparison-grid" id="comparisonResults">
+                    <!-- Comparison results will be added dynamically -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <div class="footer-content">
+            <div class="footer-column">
+                <h3>Explore</h3>
+                <ul class="footer-links">
+                    <li><a href="#timeline">Timeline</a></li>
+                    <li><a href="#periods">Historical Periods</a></li>
+                    <li><a href="#map">Geographical View</a></li>
+                    <li><a href="#events">Key Events</a></li>
+                </ul>
+            </div>
+            <div class="footer-column">
+                <h3>Resources</h3>
+                <ul class="footer-links">
+                    <li><a href="#" target="_blank">Bibliography</a></li>
+                    <li><a href="#" target="_blank">Further Reading</a></li>
+                    <li><a href="#" target="_blank">Educational Materials</a></li>
+                    <li><a href="#" target="_blank">Primary Sources</a></li>
+                </ul>
+            </div>
+            <div class="footer-column">
+                <h3>About</h3>
+                <ul class="footer-links">
+                    <li><a href="#about">Project</a></li>
+                    <li><a href="#" target="_blank">Methodology</a></li>
+                    <li><a href="#" target="_blank">Contribute</a></li>
+                    <li><a href="#" target="_blank">Contact</a></li>
+                </ul>
+                <div class="social-links">
+                    <a href="#" class="social-link" aria-label="Facebook">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M18 2H15C13.6739 2 12.4021 2.52678 11.4645 3.46447C10.5268 4.40215 10 5.67392 10 7V10H7V14H10V22H14V14H17L18 10H14V7C14 6.73478 14.1054 6.48043 14.2929 6.29289C14.4804 6.10536 14.7348 6 15 6H18V2Z" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                    </a>
+                    <a href="#" class="social-link" aria-label="Twitter">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M23 3C22.0424 3.67548 20.9821 4.19211 19.86 4.53C19.2577 3.83751 18.4573 3.34669 17.567 3.12393C16.6767 2.90116 15.7395 2.9572 14.8821 3.28445C14.0247 3.61171 13.2884 4.1944 12.773 4.95372C12.2575 5.71303 11.9877 6.61234 12 7.53V8.53C10.2426 8.57557 8.50127 8.18581 6.93101 7.39545C5.36074 6.60508 4.01032 5.43864 3 4C3 4 -1 13 8 17C5.94053 18.398 3.48716 19.0989 1 19C10 24 21 19 21 7.5C20.9991 7.22145 20.9723 6.94359 20.92 6.67C21.9406 5.66349 22.6608 4.39271 23 3V3Z" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                    </a>
+                    <a href="#" class="social-link" aria-label="Instagram">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <rect x="2" y="2" width="20" height="20" rx="5" ry="5" stroke="white" stroke-width="2"/>
+                            <path d="M16 11.37C16.1234 12.2022 15.9813 13.0522 15.5938 13.799C15.2063 14.5458 14.5931 15.1514 13.8416 15.5297C13.0901 15.9079 12.2384 16.0396 11.4078 15.9059C10.5772 15.7723 9.80976 15.3801 9.21484 14.7852C8.61991 14.1902 8.22773 13.4228 8.09406 12.5922C7.9604 11.7616 8.09208 10.9099 8.47034 10.1584C8.8486 9.40685 9.45419 8.79374 10.201 8.40624C10.9478 8.01874 11.7978 7.87658 12.63 8C13.4789 8.12588 14.2648 8.52146 14.8717 9.1283C15.4785 9.73515 15.8741 10.5211 16 11.37Z" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                    </a>
+                </div>
+            </div>
+        </div>
+        <div class="copyright">
+            <p>&copy; 2025 Bharat Visual History Project. All rights reserved.</p>
+        </div>
+    </footer>
+     
+
+    <script src="https://cdn.botpress.cloud/webchat/v2.3/inject.js"></script>
+<script src="https://files.bpcontent.cloud/2025/04/17/22/20250417220620-0OC4Y0AG.js"></script>
+    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+    <script>
+        // Show loader initially
+        document.getElementById('loader').classList.add('active');
+
+        // Simulate loading content
+        setTimeout(() => {
+            document.getElementById('loader').classList.remove('active');
+        }, 1500);
+
+        // Historical Data - Expanded with more dynasties and eras
+        const historicalPeriods = [
+            {
+                id: 'indus',
+                name: 'Indus Valley Civilization',
+                startYear: -3300,
+                endYear: -1300,
+                color: '#8D6E63',
+                rulers: ['Various city-state rulers'],
+                achievements: [
+                    'Urban planning with grid layouts',
+                    'Advanced drainage systems',
+                    'Standardized weights and measures',
+                    'Indus script (undeciphered)',
+                    'Pottery and craft specialization',
+                    'Extensive trade networks'
+                ],
+                territory: 'Northwest India and Pakistan',
+                description: 'One of the world\'s earliest urban civilizations, known for its sophisticated city planning, craft specialization, and trade networks that extended to Mesopotamia.',
+                image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/7/7a/Mohenjo-daro.jpg/1280px-Mohenjo-daro.jpg',
+                headerImage: 'https://upload.wikimedia.org/wikipedia/commons/thumb/5/5a/Dancing_Girl_of_Mohenjo-daro.jpg/1280px-Dancing_Girl_of_Mohenjo-daro.jpg',
+                shortDesc: 'Bronze Age civilization known for advanced urban planning',
+                states: ['Punjab', 'Sindh', 'Gujarat', 'Rajasthan', 'Haryana']
+            },
+            {
+                id: 'vedic',
+                name: 'Vedic Period',
+                startYear: -1500,
+                endYear: -500,
+                color: '#5D4037',
+                rulers: ['Tribal chieftains'],
+                achievements: [
+                    'Composition of the Vedas',
+                    'Development of Sanskrit',
+                    'Early Hindu traditions',
+                    'Iron Age technology',
+                    'Social varna system',
+                    'Sacrificial rituals'
+                ],
+                territory: 'Northern India',
+                description: 'The period during which the Vedas, the oldest scriptures of Hinduism, were composed, marking the foundations of Hindu philosophy and culture.',
+                image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/4/4c/Rigveda_MS2097.jpg/1280px-Rigveda_MS2097.jpg',
+                headerImage: 'https://upload.wikimedia.org/wikipedia/commons/thumb/6/6a/Yajna.jpg/1280px-Yajna.jpg',
+                shortDesc: 'Era of Vedic scriptures and early Hinduism',
+                states: ['Uttar Pradesh', 'Bihar', 'Haryana', 'Punjab', 'Rajasthan']
+            },
+            {
+                id: 'maurya',
+                name: 'Maurya Empire',
+                startYear: -322,
+                endYear: -185,
+                color: '#5D4037',
+                rulers: ['Chandragupta Maurya', 'Bindusara', 'Ashoka the Great'],
+                achievements: [
+                    'First pan-Indian empire',
+                    'Spread of Buddhism under Ashoka',
+                    'Advanced administrative system',
+                    'Construction of stupas and pillars',
+                    'Extensive road network',
+                    'Diplomatic relations with Hellenistic kingdoms'
+                ],
+                territory: 'Most of the Indian subcontinent',
+                description: 'The first empire to unify most of the Indian subcontinent, known for its efficient administration and Ashoka\'s conversion to Buddhism after the Kalinga War.',
+                image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/4/4a/Ashoka%27s_visit_to_the_Ramagrama_stupa_Sanchi_Stupa_1_Southern_gateway.jpg/1280px-Ashoka%27s_visit_to_the_Ramagrama_stupa_Sanchi_Stupa_1_Southern_gateway.jpg',
+                headerImage: 'https://upload.wikimedia.org/wikipedia/commons/thumb/1/1a/Ashoka_Pillar_at_Vaishali%2C_Bihar%2C_India.jpg/1280px-Ashoka_Pillar_at_Vaishali%2C_Bihar%2C_India.jpg',
+                shortDesc: 'First pan-Indian empire that spread Buddhism across Asia',
+                states: ['Bihar', 'Uttar Pradesh', 'Madhya Pradesh', 'Gujarat', 'Maharashtra', 'Karnataka', 'Andhra Pradesh']
+            },
+            {
+                id: 'gupta',
+                name: 'Gupta Empire',
+                startYear: 320,
+                endYear: 550,
+                color: '#FFA000',
+                rulers: ['Chandragupta I', 'Samudragupta', 'Chandragupta II', 'Kumaragupta I', 'Skandagupta'],
+                achievements: [
+                    'Golden Age of India',
+                    'Advancements in science, mathematics, and astronomy',
+                    'Development of Sanskrit literature',
+                    'Construction of temples and universities',
+                    'Decimal system and concept of zero',
+                    'Classical Indian art and architecture'
+                ],
+                territory: 'Northern and Central India',
+                description: 'Known as the Golden Age of India, this period saw remarkable achievements in arts, science, and literature, including the works of Kalidasa and Aryabhata\'s astronomical discoveries.',
+                image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/6/6f/Gupta_Empire_4th_century_CE.png/1280px-Gupta_Empire_4th_century_CE.png',
+                headerImage: 'https://upload.wikimedia.org/wikipedia/commons/thumb/5/5a/Gupta_coinage.jpg/1280px-Gupta_coinage.jpg',
+                shortDesc: 'Golden Age with breakthroughs in science and arts',
+                states: ['Uttar Pradesh', 'Bihar', 'Madhya Pradesh', 'West Bengal', 'Odisha']
+            },
+            {
+                id: 'chola',
+                name: 'Chola Dynasty',
+                startYear: 300,
+                endYear: 1279,
+                color: '#388E3C',
+                rulers: ['Rajaraja Chola I', 'Rajendra Chola I', 'Kulottunga Chola I'],
+                achievements: [
+                    'Naval expeditions to Southeast Asia',
+                    'Grand temple architecture',
+                    'Administrative innovations',
+                    'Thriving trade with China and Arabia',
+                    'Development of Tamil literature',
+                    'Bronze sculpture mastery'
+                ],
+                territory: 'South India and Southeast Asia',
+                description: 'One of the longest-ruling dynasties in world history, known for its naval power, temple architecture, and cultural influence across Southeast Asia.',
+                image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/1/1e/Brihadisvara_Temple_Thanjavur.jpg/1280px-Brihadisvara_Temple_Thanjavur.jpg',
+                headerImage: 'https://upload.wikimedia.org/wikipedia/commons/thumb/2/2e/CholaBronze.jpg/1280px-CholaBronze.jpg',
+                shortDesc: 'Maritime empire with cultural influence across Asia',
+                states: ['Tamil Nadu', 'Kerala', 'Andhra Pradesh', 'Karnataka', 'Odisha']
+            },
+            {
+                id: 'delhi-sultanate',
+                name: 'Delhi Sultanate',
+                startYear: 1206,
+                endYear: 1526,
+                color: '#D32F2F',
+                rulers: ['Qutb-ud-din Aibak', 'Alauddin Khalji', 'Muhammad bin Tughlaq'],
+                achievements: [
+                    'Indo-Islamic architecture',
+                    'Introduction of new irrigation methods',
+                    'Establishment of Persian administrative systems',
+                    'Development of Hindustani language',
+                    'Construction of Qutub Minar',
+                    'Expansion of trade networks'
+                ],
+                territory: 'Northern India',
+                description: 'A series of Muslim dynasties that ruled from Delhi, introducing Persianate culture and Islamic architecture to the subcontinent.',
+                image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/3/3c/Qutb_minar.jpg/1280px-Qutb_minar.jpg',
+                headerImage: 'https://upload.wikimedia.org/wikipedia/commons/thumb/4/4f/Alai_Darwaza_2011.jpg/1280px-Alai_Darwaza_2011.jpg',
+                shortDesc: 'Period of Indo-Islamic cultural synthesis',
+                states: ['Delhi', 'Uttar Pradesh', 'Bihar', 'Bengal', 'Punjab']
+            },
+            {
+                id: 'vijayanagara',
+                name: 'Vijayanagara Empire',
+                startYear: 1336,
+                endYear: 1646,
+                color: '#7B1FA2',
+                rulers: ['Harihara I', 'Bukka Raya I', 'Krishnadevaraya'],
+                achievements: [
+                    'Protection of Hindu traditions',
+                    'Grand temple architecture',
+                    'International trade networks',
+                    'Development of Carnatic music',
+                    'Irrigation innovations',
+                    'Monumental city of Hampi'
+                ],
+                territory: 'South India',
+                description: 'The last great Hindu empire of South India, known for its magnificent capital at Hampi and its patronage of arts and culture.',
+                image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/5/5a/Vijayanagara_Empire_map.png/1280px-Vijayanagara_Empire_map.png',
+                headerImage: 'https://upload.wikimedia.org/wikipedia/commons/thumb/6/6e/Virupaksha_temple.jpg/1280px-Virupaksha_temple.jpg',
+                shortDesc: 'Last great Hindu empire of South India',
+                states: ['Karnataka', 'Andhra Pradesh', 'Tamil Nadu', 'Kerala']
+            },
+            {
+                id: 'mughal',
+                name: 'Mughal Empire',
+                startYear: 1526,
+                endYear: 1857,
+                color: '#388E3C',
+                rulers: ['Babur', 'Akbar', 'Jahangir', 'Shah Jahan', 'Aurangzeb'],
+                achievements: [
+                    'Synthesis of Persian and Indian cultures',
+                    'Architectural marvels like Taj Mahal',
+                    'Development of Mughlai cuisine',
+                    'Land revenue system',
+                    'Miniature painting tradition',
+                    'Establishment of Urdu language'
+                ],
+                territory: 'Most of the Indian subcontinent',
+                description: 'One of the most powerful empires in Indian history, known for its rich cultural legacy, architectural achievements, and the establishment of a centralized administration system.',
+                image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/1/1e/Taj_Mahal_in_India_-_Kristian_Bertel.jpg/1280px-Taj_Mahal_in_India_-_Kristian_Bertel.jpg',
+                headerImage: 'https://upload.wikimedia.org/wikipedia/commons/thumb/2/2e/Akbar%27s_Dream_1605.jpg/1280px-Akbar%27s_Dream_1605.jpg',
+                shortDesc: 'Era of cultural synthesis and architectural wonders',
+                states: ['Uttar Pradesh', 'Punjab', 'Bengal', 'Gujarat', 'Kashmir', 'Deccan']
+            },
+            {
+                id: 'maratha',
+                name: 'Maratha Empire',
+                startYear: 1674,
+                endYear: 1818,
+                color: '#E64A19',
+                rulers: ['Shivaji', 'Sambhaji', 'Rajaram', 'Shahu', 'Peshwas'],
+                achievements: [
+                    'Resistance against Mughal rule',
+                    'Naval power development',
+                    'Administrative innovations',
+                    'Revival of Hindu traditions',
+                    'Expansion across India',
+                    'Cultural patronage'
+                ],
+                territory: 'Large parts of India',
+                description: 'A Hindu empire that rose to challenge Mughal dominance, known for its military prowess and administrative systems that influenced later Indian governance.',
+                image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/8/8e/Shivaji_Maratha_Coronation.jpg/1280px-Shivaji_Maratha_Coronation.jpg',
+                headerImage: 'https://upload.wikimedia.org/wikipedia/commons/thumb/3/3c/Raigad_Fort.jpg/1280px-Raigad_Fort.jpg',
+                shortDesc: 'Hindu empire that challenged Mughal dominance',
+                states: ['Maharashtra', 'Gujarat', 'Madhya Pradesh', 'Karnataka', 'Tamil Nadu']
+            
+            },
+            {
+                id: 'british',
+                name: 'British Raj',
+                startYear: 1858,
+                endYear: 1947,
+                color: '#D32F2F',
+                rulers: ['Queen Victoria', 'British Viceroys'],
+                achievements: [
+                    'Railway network development',
+                    'Modern education system',
+                    'Administrative unification',
+                    'Indian independence movement',
+                    'Introduction of tea cultivation',
+                    'Establishment of modern industries'
+                ],
+                territory: 'Indian subcontinent',
+                description: 'The period of British colonial rule in India, marked by economic exploitation but also the rise of nationalist movements that eventually led to India\'s independence in 1947.',
+                image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/3/3a/Indian_railways.jpg/1280px-Indian_railways.jpg',
+                headerImage: 'https://upload.wikimedia.org/wikipedia/commons/thumb/1/1a/Siege_of_Delhi_1857.jpg/1280px-Siege_of_Delhi_1857.jpg',
+                shortDesc: 'Colonial period that shaped modern India',
+                states: ['All modern Indian states']
+            }
+        ];
+
+        // Sample events data with high-quality images
+        const historicalEvents = [
+            {
+                id: 'event1',
+                title: 'Development of Indus Valley Cities',
+                date: '2600 BCE',
+                period: 'indus',
+                type: 'cultural',
+                description: 'The mature phase of the Indus Valley Civilization begins, with well-planned cities like Mohenjo-Daro and Harappa featuring advanced drainage systems, public baths, and uniform brick sizes.',
+                image: 'indus_valley.jpg',
+                link: 'https://en.wikipedia.org/wiki/Indus_Valley_Civilization'
+            },
+            {
+                id: 'event2',
+                title: 'Composition of Rigveda',
+                date: '1500 BCE',
+                period: 'vedic',
+                type: 'cultural',
+                description: 'The oldest of the Vedas, the Rigveda, is composed, containing hymns that form the foundation of Hindu philosophy and rituals.',
+                image: 'veda.jpeg',
+                link: 'https://en.wikipedia.org/wiki/Rigveda'
+            },
+            {
+                id: 'event3',
+                title: 'Ashoka Converts to Buddhism',
+                date: '263 BCE',
+                period: 'maurya',
+                type: 'religious',
+                description: 'After the bloody Kalinga war that resulted in massive casualties, Emperor Ashoka embraces Buddhism and begins spreading its teachings through edicts and missionaries sent across Asia.',
+                image: 'Ashoka.jpg',
+                link: 'https://en.wikipedia.org/wiki/Ashoka'
+            },
+            {
+                id: 'event4',
+                title: 'Aryabhata Writes Aryabhatiya',
+                date: '499 CE',
+                period: 'gupta',
+                type: 'cultural',
+                description: 'The mathematician and astronomer Aryabhata composes his seminal work Aryabhatiya, making significant advances in mathematics and astronomy including approximation of π and explanation of eclipses.',
+                image: 'Aryabhata.jpeg',
+                link: 'https://en.wikipedia.org/wiki/Aryabhata'
+            },
+            {
+                id: 'event5',
+                title: 'Rajaraja Chola Builds Brihadisvara Temple',
+                date: '1010 CE',
+                period: 'chola',
+                type: 'cultural',
+                description: 'Rajaraja Chola I completes the Brihadisvara Temple in Thanjavur, a masterpiece of Chola architecture and a UNESCO World Heritage Site.',
+                image: 'cholatemple.jpg',
+                link: 'https://en.wikipedia.org/wiki/Brihadisvara_Temple%2C_Thanjavur'
+            },
+            {
+                id: 'event6',
+                title: 'Construction of Qutub Minar',
+                date: '1199-1220',
+                period: 'delhi-sultanate',
+                type: 'cultural',
+                description: 'Construction of the Qutub Minar begins under Qutb ud-Din Aibak, marking the beginning of Indo-Islamic architecture in India.',
+                image: 'Qutbminar.jpg',
+                link: 'https://en.wikipedia.org/wiki/Qutb_Minar'
+            },
+            {
+                id: 'event7',
+                title: 'Construction of Taj Mahal',
+                date: '1632-1653',
+                period: 'mughal',
+                type: 'cultural',
+                description: 'Mughal emperor Shah Jahan builds the Taj Mahal as a mausoleum for his wife Mumtaz Mahal, employing 20,000 artisans and becoming one of the most iconic examples of Mughal architecture.',
+                image: 'tajmahal.jpeg',
+                link: 'https://en.wikipedia.org/wiki/Taj_Mahal'
+            },
+            {
+                id: 'event8',
+                title: 'First War of Indian Independence',
+                date: '1857',
+                period: 'british',
+                type: 'military',
+                description: 'A major uprising against British rule begins with sepoy mutinies, marking the beginning of the organized Indian independence movement and leading to the end of East India Company rule.',
+                image: '1stBattle.jpeg',
+                link: 'https://en.wikipedia.org/wiki/Indian_Rebellion_of_1857'
+            },
+            {
+                id: 'event9',
+                title: 'Coronation of Shivaji',
+                date: '1674',
+                period: 'maratha',
+                type: 'political',
+                description: 'Shivaji is formally crowned as Chhatrapati, establishing the Maratha Empire that would challenge Mughal dominance in India.',
+                image: 'Shivaji.jpg',
+                link: 'https://en.wikipedia.org/wiki/Shivaji'
+            }
+        ];
+
+        // Sample map data (simplified)
+        const mapData = {
+            battles: [
+                { name: 'Battle of Hydaspes', period: 'maurya', coords: [32.8, 73.5], year: '326 BCE', description: 'Alexander the Great vs. King Porus' },
+                { name: 'Battle of Plassey', period: 'british', coords: [23.8, 88.25], year: '1757', description: 'British East India Company vs. Nawab of Bengal' },
+                { name: 'Battle of Panipat (1st)', period: 'mughal', coords: [29.39, 76.97], year: '1526', description: 'Babur vs. Ibrahim Lodi' },
+                { name: 'Battle of Talikota', period: 'vijayanagara', coords: [16.5, 76.8], year: '1565', description: 'Deccan Sultanates vs. Vijayanagara Empire' },
+                { name: 'Battle of Buxar', period: 'british', coords: [25.55, 84.1], year: '1764', description: 'British vs. Mughal Emperor Shah Alam II' },
+                { name: 'Battle of Seringapatam', period: 'british', coords: [12.42, 76.7], year: '1799', description: 'British vs. Tipu Sultan' }
+            ]
+        };
+
+        // State coordinates for highlighting (simplified)
+        const stateCoordinates = {
+            'Punjab': [[31.5, 75.5], [30.5, 76.5], [29.5, 75.5], [30.5, 74.5]],
+            'Sindh': [[25.5, 68.5], [24.5, 69.5], [23.5, 68.5], [24.5, 67.5]],
+            'Gujarat': [[22.5, 71.5], [21.5, 72.5], [20.5, 71.5], [21.5, 70.5]],
+            'Rajasthan': [[26.5, 74.5], [25.5, 75.5], [24.5, 74.5], [25.5, 73.5]],
+            'Haryana': [[29.5, 76.5], [28.5, 77.5], [27.5, 76.5], [28.5, 75.5]],
+            'Uttar Pradesh': [[27.5, 80.5], [26.5, 81.5], [25.5, 80.5], [26.5, 79.5]],
+            'Bihar': [[25.5, 85.5], [24.5, 86.5], [23.5, 85.5], [24.5, 84.5]],
+            'Madhya Pradesh': [[23.5, 77.5], [22.5, 78.5], [21.5, 77.5], [22.5, 76.5]],
+            'Maharashtra': [[19.5, 75.5], [18.5, 76.5], [17.5, 75.5], [18.5, 74.5]],
+            'Karnataka': [[15.5, 76.5], [14.5, 77.5], [13.5, 76.5], [14.5, 75.5]],
+            'Andhra Pradesh': [[16.5, 80.5], [15.5, 81.5], [14.5, 80.5], [15.5, 79.5]],
+            'Tamil Nadu': [[11.5, 78.5], [10.5, 79.5], [9.5, 78.5], [10.5, 77.5]],
+            'Kerala': [[10.5, 76.5], [9.5, 77.5], [8.5, 76.5], [9.5, 75.5]],
+            'West Bengal': [[23.5, 88.5], [22.5, 89.5], [21.5, 88.5], [22.5, 87.5]],
+            'Odisha': [[20.5, 85.5], [19.5, 86.5], [18.5, 85.5], [19.5, 84.5]],
+            'Delhi': [[28.7, 77.2]],
+            'Bengal': [[23.5, 88.5], [22.5, 89.5], [21.5, 88.5], [22.5, 87.5]],
+            'Kashmir': [[34.5, 76.5], [33.5, 77.5], [32.5, 76.5], [33.5, 75.5]],
+            'Deccan': [[18.5, 77.5], [17.5, 78.5], [16.5, 77.5], [17.5, 76.5]]
+        };
+
+        // DOM Elements
+        const timelineScroll = document.getElementById('timelineScroll');
+        const periodCards = document.getElementById('periodCards');
+        const eventsGrid = document.getElementById('eventsGrid');
+        const eraSelect = document.getElementById('eraSelect');
+        const eventEraFilter = document.getElementById('eventEraFilter');
+        const eventTypeFilter = document.getElementById('eventTypeFilter');
+        const eventSearch = document.getElementById('eventSearch');
+        const compareBtn = document.getElementById('compareBtn');
+        const comparisonModal = document.getElementById('comparisonModal');
+        const closeModal = document.querySelector('.close-modal');
+        const comparePeriod1 = document.getElementById('comparePeriod1');
+        const comparePeriod2 = document.getElementById('comparePeriod2');
+        const compareSubmit = document.getElementById('compareSubmit');
+        const comparisonResults = document.getElementById('comparisonResults');
+        const mobileMenuBtn = document.querySelector('.mobile-menu-btn');
+        const navMenu = document.querySelector('.nav-menu');
+        const timelineTooltip = document.getElementById('timelineTooltip');
+
+        // Initialize the map
+        const historyMap = L.map('history-map').setView([20.5937, 78.9629], 5);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+        }).addTo(historyMap);
+
+        // Map layers
+        const borderLayers = {};
+        const battleMarkers = {};
+        let currentLayer = 'borders';
+
+        // Initialize the application
+        function init() {
+            renderTimeline();
+            renderPeriodCards();
+            renderEvents();
+            setupMap();
+            setupEventListeners();
+            populateEraSelects();
+            
+            // Show first timeline item as active by default
+            const firstTimelineItem = document.querySelector('.timeline-item');
+            if (firstTimelineItem) {
+                firstTimelineItem.classList.add('active');
+            }
+        }
+
+        // Render the interactive timeline
+        function renderTimeline() {
+            historicalPeriods.forEach(period => {
+                const timelineItem = document.createElement('div');
+                timelineItem.className = 'timeline-item';
+                timelineItem.style.borderTopColor = period.color;
+                timelineItem.dataset.periodId = period.id;
+                timelineItem.setAttribute('aria-label', `${period.name} (${Math.abs(period.startYear)} ${period.startYear < 0 ? 'BCE' : 'CE'} - ${Math.abs(period.endYear)} ${period.endYear < 0 ? 'BCE' : 'CE'})`);
+                
+                const periodName = document.createElement('div');
+                periodName.className = 'timeline-period';
+                periodName.textContent = period.name;
+                
+                const years = document.createElement('div');
+                years.className = 'timeline-years';
+                years.textContent = `${Math.abs(period.startYear)} ${period.startYear < 0 ? 'BCE' : 'CE'} - ${Math.abs(period.endYear)} ${period.endYear < 0 ? 'BCE' : 'CE'}`;
+                
+                timelineItem.appendChild(periodName);
+                timelineItem.appendChild(years);
+                timelineScroll.appendChild(timelineItem);
+                
+                // Add hover effect for tooltip
+                timelineItem.addEventListener('mouseenter', (e) => {
+                    const rect = timelineItem.getBoundingClientRect();
+                    timelineTooltip.style.left = `${rect.left + rect.width/2}px`;
+                    timelineTooltip.style.top = `${rect.top - 50}px`;
+                    timelineTooltip.style.transform = 'translateX(-50%)';
+                    timelineTooltip.textContent = period.shortDesc;
+                    timelineTooltip.style.opacity = '1';
+                });
+                
+                timelineItem.addEventListener('mouseleave', () => {
+                    timelineTooltip.style.opacity = '0';
+                });
+                
+                // Add click event to scroll to period
+                timelineItem.addEventListener('click', () => {
+                    document.querySelector(`.period-card[data-period-id="${period.id}"]`).scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                    
+                    // Update active state
+                    document.querySelectorAll('.timeline-item').forEach(item => {
+                        item.classList.remove('active');
+                    });
+                    timelineItem.classList.add('active');
+                    
+                    // Add pulse animation
+                    timelineItem.style.animation = 'none';
+                    void timelineItem.offsetWidth; // Trigger reflow
+                    timelineItem.style.animation = 'pulse 2s infinite';
+                });
+            });
+        }
+
+        // Render period cards
+        function renderPeriodCards() {
+            historicalPeriods.forEach(period => {
+                const card = document.createElement('div');
+                card.className = 'period-card';
+                card.dataset.periodId = period.id;
+                
+                // Card header with background image
+                const cardHeader = document.createElement('div');
+                cardHeader.className = 'card-header';
+                cardHeader.style.backgroundColor = period.color;
+                cardHeader.style.backgroundImage = `linear-gradient(rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.3)), url('${period.headerImage}')`;
+                
+                const cardTitle = document.createElement('h3');
+                cardTitle.className = 'card-title';
+                cardTitle.textContent = period.name;
+                
+                const cardYears = document.createElement('div');
+                cardYears.className = 'card-years';
+                cardYears.textContent = `${Math.abs(period.startYear)} ${period.startYear < 0 ? 'BCE' : 'CE'} - ${Math.abs(period.endYear)} ${period.endYear < 0 ? 'BCE' : 'CE'}`;
+                
+                cardHeader.appendChild(cardTitle);
+                cardHeader.appendChild(cardYears);
+                
+                // Card body
+                const cardBody = document.createElement('div');
+                cardBody.className = 'card-body';
+                
+                const cardRulers = document.createElement('div');
+                cardRulers.className = 'card-rulers';
+                cardRulers.innerHTML = `<strong>Key Rulers:</strong> `;
+                
+                period.rulers.forEach((ruler, index) => {
+                    const rulerSpan = document.createElement('span');
+                    rulerSpan.textContent = ruler;
+                    cardRulers.appendChild(rulerSpan);
+                    if (index < period.rulers.length - 1) {
+                        cardRulers.appendChild(document.createTextNode(', '));
+                    }
+                });
+                
+                const cardAchievements = document.createElement('div');
+                cardAchievements.className = 'card-achievements';
+                cardAchievements.innerHTML = `<strong>Achievements:</strong>`;
+                
+                const achievementsList = document.createElement('ul');
+                period.achievements.forEach(achievement => {
+                    const li = document.createElement('li');
+                    li.textContent = achievement;
+                    achievementsList.appendChild(li);
+                });
+                
+                cardAchievements.appendChild(achievementsList);
+                
+                const cardMap = document.createElement('div');
+                cardMap.className = 'card-map';
+                cardMap.id = `map-${period.id}`;
+                
+                cardBody.appendChild(cardRulers);
+                cardBody.appendChild(cardAchievements);
+                cardBody.appendChild(cardMap);
+                
+                // Assemble card
+                card.appendChild(cardHeader);
+                card.appendChild(cardBody);
+                
+                periodCards.appendChild(card);
+                
+                // Initialize mini map for each period
+                initMiniMap(period.id, period.name);
+                
+                // Add hover effect to cards
+                card.addEventListener('mouseenter', () => {
+                    const timelineItem = document.querySelector(`.timeline-item[data-period-id="${period.id}"]`);
+                    if (timelineItem) {
+                        timelineItem.style.transform = 'translateY(-10px)';
+                        timelineItem.style.boxShadow = '0 10px 20px rgba(0, 0, 0, 0.2)';
+                    }
+                });
+                
+                card.addEventListener('mouseleave', () => {
+                    const timelineItem = document.querySelector(`.timeline-item[data-period-id="${period.id}"]`);
+                    if (timelineItem && !timelineItem.classList.contains('active')) {
+                        timelineItem.style.transform = '';
+                        timelineItem.style.boxShadow = '';
+                    }
+                });
+            });
+        }
+
+        // Initialize mini maps for period cards
+        function initMiniMap(periodId, periodName) {
+            const miniMap = L.map(`map-${periodId}`, {
+                zoomControl: false,
+                attributionControl: false,
+                dragging: false,
+                doubleClickZoom: false,
+                scrollWheelZoom: false,
+                boxZoom: false,
+                tap: false
+            }).setView([20.5937, 78.9629], 4);
+            
+            // Add a simple base layer
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(miniMap);
+            
+            // Add territory outline (simplified)
+            const period = historicalPeriods.find(p => p.id === periodId);
+            if (period && period.states) {
+                period.states.forEach(state => {
+                    if (stateCoordinates[state]) {
+                        const bounds = stateCoordinates[state].map(coord => L.latLng(coord[0], coord[1]));
+                        L.polygon(bounds, {
+                            color: period.color,
+                            fillOpacity: 0.3,
+                            weight: 2
+                        }).addTo(miniMap);
+                    }
+                });
+            }
+            
+            // Disable all interaction
+            miniMap.touchZoom.disable();
+            miniMap.doubleClickZoom.disable();
+            miniMap.scrollWheelZoom.disable();
+            miniMap.boxZoom.disable();
+            miniMap.keyboard.disable();
+        }
+
+        // Render historical events
+        function renderEvents(filteredEvents = historicalEvents) {
+            eventsGrid.innerHTML = '';
+            
+            filteredEvents.forEach(event => {
+                const period = historicalPeriods.find(p => p.id === event.period);
+                
+                const eventCard = document.createElement('div');
+                eventCard.className = 'event-card';
+                eventCard.dataset.eventId = event.id;
+                eventCard.dataset.period = event.period;
+                eventCard.dataset.type = event.type;
+                
+                const eventImageContainer = document.createElement('div');
+                eventImageContainer.className = 'event-image-container';
+                
+                const eventImage = document.createElement('img');
+                eventImage.className = 'event-image';
+                eventImage.src = event.image;
+                eventImage.alt = event.title;
+                eventImage.loading = "lazy";
+                
+                const eventPeriod = document.createElement('div');
+                eventPeriod.className = 'event-period';
+                eventPeriod.textContent = period.name;
+                eventPeriod.style.backgroundColor = period.color;
+                
+                eventImageContainer.appendChild(eventImage);
+                eventImageContainer.appendChild(eventPeriod);
+                
+                const eventContent = document.createElement('div');
+                eventContent.className = 'event-content';
+                
+                const eventDate = document.createElement('div');
+                eventDate.className = 'event-date';
+                eventDate.textContent = event.date;
+                
+                const eventTitle = document.createElement('h3');
+                eventTitle.className = 'event-title';
+                eventTitle.textContent = event.title;
+                
+                const eventDesc = document.createElement('p');
+                eventDesc.className = 'event-desc';
+                eventDesc.textContent = event.description;
+                
+                const learnMore = document.createElement('a');
+                learnMore.className = 'learn-more';
+                learnMore.href = event.link;
+                learnMore.textContent = 'Learn More';
+                learnMore.target = '_blank';
+                learnMore.rel = 'noopener noreferrer';
+                learnMore.innerHTML += ' <svg width="12" height="12" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M18 13V19C18 20.1046 17.1046 21 16 21H5C3.89543 21 3 20.1046 3 19V8C3 6.89543 3.89543 6 5 6H11" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M15 3H21V9" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M10 14L21 3" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+                
+                eventContent.appendChild(eventDate);
+                eventContent.appendChild(eventTitle);
+                eventContent.appendChild(eventDesc);
+                eventContent.appendChild(learnMore);
+                
+                eventCard.appendChild(eventImageContainer);
+                eventCard.appendChild(eventContent);
+                
+                eventsGrid.appendChild(eventCard);
+            });
+        }
+
+        // Set up the main map with layers
+        function setupMap() {
+            // Create border layers for each period by highlighting states
+            historicalPeriods.forEach(period => {
+                const stateLayers = [];
+                
+                if (period.states) {
+                    period.states.forEach(state => {
+                        if (stateCoordinates[state]) {
+                            const bounds = stateCoordinates[state].map(coord => L.latLng(coord[0], coord[1]));
+                            const polygon = L.polygon(bounds, {
+                                color: period.color,
+                                weight: 2,
+                                fillOpacity: 0.3,
+                                periodId: period.id
+                            }).bindPopup(`<strong>${period.name} Territory</strong><br>Included ${state}`);
+                            
+                            stateLayers.push(polygon);
+                        }
+                    });
+                }
+                
+                borderLayers[period.id] = L.layerGroup(stateLayers);
+            });
+            
+            // Create battle markers with enhanced styling
+            mapData.battles.forEach(battle => {
+                const period = historicalPeriods.find(p => p.id === battle.period);
+                battleMarkers[battle.name] = L.marker([battle.coords[0], battle.coords[1]], {
+                    icon: L.divIcon({
+                        className: 'battle-marker',
+                        html: '⚔️',
+                        iconSize: [30, 30]
+                    }),
+                    periodId: battle.period
+                }).bindPopup(`<strong style="color:${period.color}">${battle.name}</strong><br><strong>Year:</strong> ${battle.year}<br><strong>Description:</strong> ${battle.description}<br><strong>Period:</strong> ${period.name}`);
+            });
+            
+            // Show borders by default
+            showBorders();
+        }
+
+        // Show border layers on map
+        function showBorders() {
+            clearMap();
+            currentLayer = 'borders';
+            
+            historicalPeriods.forEach(period => {
+                borderLayers[period.id].addTo(historyMap);
+            });
+            
+            updateMapControlButtons();
+        }
+
+        // Show battle markers on map
+        function showBattles() {
+            clearMap();
+            currentLayer = 'battles';
+            
+            mapData.battles.forEach(battle => {
+                battleMarkers[battle.name].addTo(historyMap);
+            });
+            
+            updateMapControlButtons();
+        }
+
+        // Clear all layers from map
+        function clearMap() {
+            historyMap.eachLayer(layer => {
+                if (layer instanceof L.Polygon || layer instanceof L.Marker || layer instanceof L.LayerGroup) {
+                    historyMap.removeLayer(layer);
+                }
+            });
+        }
+
+        // Update active state of map control buttons
+        function updateMapControlButtons() {
+            document.querySelectorAll('.map-btn').forEach(btn => {
+                btn.classList.remove('active');
+                if (btn.dataset.layer === currentLayer) {
+                    btn.classList.add('active');
+                }
+            });
+        }
+
+        // Filter map by era
+        function filterMapByEra(eraId) {
+            if (eraId === 'all') {
+                // Show all features for current layer
+                if (currentLayer === 'borders') {
+                    showBorders();
+                } else if (currentLayer === 'battles') {
+                    showBattles();
+                }
+            } else {
+                // Filter features by era
+                clearMap();
+                
+                if (currentLayer === 'borders') {
+                    borderLayers[eraId].addTo(historyMap);
+                } else if (currentLayer === 'battles') {
+                    mapData.battles.forEach(battle => {
+                        if (battle.period === eraId) {
+                            battleMarkers[battle.name].addTo(historyMap);
+                        }
+                    });
+                }
+            }
+        }
+
+        // Populate era select dropdowns
+        function populateEraSelects() {
+            // Clear existing options
+            eraSelect.innerHTML = '<option value="all">All Eras</option>';
+            eventEraFilter.innerHTML = '<option value="all">All Periods</option>';
+            comparePeriod1.innerHTML = '';
+            comparePeriod2.innerHTML = '';
+            
+            // Add options for each historical period
+            historicalPeriods.forEach(period => {
+                const option1 = document.createElement('option');
+                option1.value = period.id;
+                option1.textContent = period.name;
+                eraSelect.appendChild(option1);
+                
+                const option2 = document.createElement('option');
+                option2.value = period.id;
+                option2.textContent = period.name;
+                eventEraFilter.appendChild(option2);
+                
+                const option3 = document.createElement('option');
+                option3.value = period.id;
+                option3.textContent = period.name;
+                comparePeriod1.appendChild(option3);
+                
+                const option4 = document.createElement('option');
+                option4.value = period.id;
+                option4.textContent = period.name;
+                comparePeriod2.appendChild(option4);
+            });
+            
+            // Set different default values for comparison selects
+            if (historicalPeriods.length >= 2) {
+                comparePeriod1.value = historicalPeriods[0].id;
+                comparePeriod2.value = historicalPeriods[1].id;
+            }
+        }
+
+        // Filter events based on selected filters
+        function filterEvents() {
+            const eraFilter = eventEraFilter.value;
+            const typeFilter = eventTypeFilter.value;
+            const searchQuery = eventSearch.value.toLowerCase();
+            
+            const filtered = historicalEvents.filter(event => {
+                // Filter by era
+                if (eraFilter !== 'all' && event.period !== eraFilter) {
+                    return false;
+                }
+                
+                // Filter by type
+                if (typeFilter !== 'all' && event.type !== typeFilter) {
+                    return false;
+                }
+                
+                // Filter by search query
+                if (searchQuery && 
+                    !event.title.toLowerCase().includes(searchQuery) && 
+                    !event.description.toLowerCase().includes(searchQuery) &&
+                    !event.date.toLowerCase().includes(searchQuery)) {
+                    return false;
+                }
+                
+                return true;
+            });
+            
+            renderEvents(filtered);
+            
+            // Show message if no events found
+            if (filtered.length === 0) {
+                eventsGrid.innerHTML = `<div class="no-results" style="grid-column:1/-1; text-align:center; padding:2rem;">
+                    <svg width="48" height="48" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="opacity:0.5;">
+                        <path d="M3 3L21 21M10.584 10.587L12 12M12 12L13.414 13.413M12 12L10.584 13.413M12 12L13.414 10.587M21 12C21 16.971 16.971 21 12 21C7.029 21 3 16.971 3 12C3 7.029 7.029 3 12 3C16.971 3 21 7.029 21 12Z" stroke="var(--indigo)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                    <h3 style="color:var(--indigo); margin-top:1rem;">No events found matching your criteria</h3>
+                    <p>Try adjusting your filters or search term</p>
+                </div>`;
+            }
+        }
+
+        // Compare two historical periods
+        function comparePeriods(period1Id, period2Id) {
+            const period1 = historicalPeriods.find(p => p.id === period1Id);
+            const period2 = historicalPeriods.find(p => p.id === period2Id);
+            
+            comparisonResults.innerHTML = '';
+            
+            // Create comparison cards
+            const card1 = document.createElement('div');
+            card1.className = 'comparison-card';
+            card1.innerHTML = `
+                <h4 class="comparison-title" style="color: ${period1.color}">${period1.name}</h4>
+                <div class="comparison-feature">
+                    <strong>Duration:</strong> ${Math.abs(period1.startYear)} ${period1.startYear < 0 ? 'BCE' : 'CE'} - ${Math.abs(period1.endYear)} ${period1.endYear < 0 ? 'BCE' : 'CE'}
+                </div>
+                <div class="comparison-feature">
+                    <strong>Key Rulers:</strong> ${period1.rulers.join(', ')}
+                </div>
+                <div class="comparison-feature">
+                    <strong>Territory:</strong> ${period1.territory}
+                </div>
+                <div class="comparison-feature">
+                    <strong>Achievements:</strong>
+                    <ul>
+                        ${period1.achievements.map(a => `<li>${a}</li>`).join('')}
+                    </ul>
+                </div>
+                <div class="comparison-feature">
+                    <strong>Legacy:</strong> ${period1.shortDesc}
+                </div>
+            `;
+            
+            const card2 = document.createElement('div');
+            card2.className = 'comparison-card';
+            card2.innerHTML = `
+                <h4 class="comparison-title" style="color: ${period2.color}">${period2.name}</h4>
+                <div class="comparison-feature">
+                    <strong>Duration:</strong> ${Math.abs(period2.startYear)} ${period2.startYear < 0 ? 'BCE' : 'CE'} - ${Math.abs(period2.endYear)} ${period2.endYear < 0 ? 'BCE' : 'CE'}
+                </div>
+                <div class="comparison-feature">
+                    <strong>Key Rulers:</strong> ${period2.rulers.join(', ')}
+                </div>
+                <div class="comparison-feature">
+                    <strong>Territory:</strong> ${period2.territory}
+                </div>
+                <div class="comparison-feature">
+                    <strong>Achievements:</strong>
+                    <ul>
+                        ${period2.achievements.map(a => `<li>${a}</li>`).join('')}
+                    </ul>
+                </div>
+                <div class="comparison-feature">
+                    <strong>Legacy:</strong> ${period2.shortDesc}
+                </div>
+            `;
+            
+            comparisonResults.appendChild(card1);
+            comparisonResults.appendChild(card2);
+            
+            // Add animation to comparison cards
+            card1.style.animation = 'fadeInUp 0.5s ease-out';
+            card2.style.animation = 'fadeInUp 0.5s ease-out 0.2s';
+            card1.style.opacity = '1';
+            card2.style.opacity = '0';
+            setTimeout(() => {
+                card2.style.opacity = '1';
+            }, 200);
+        }
+
+        // Set up event listeners
+        function setupEventListeners() {
+            // Map control buttons
+            document.querySelectorAll('.map-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    if (btn.dataset.layer === 'borders') {
+                        showBorders();
+                    } else if (btn.dataset.layer === 'battles') {
+                        showBattles();
+                    }
+                });
+            });
+            
+            // Era filter for map
+            eraSelect.addEventListener('change', () => {
+                filterMapByEra(eraSelect.value);
+            });
+            
+            // Event filters
+            eventEraFilter.addEventListener('change', filterEvents);
+            eventTypeFilter.addEventListener('change', filterEvents);
+            eventSearch.addEventListener('input', filterEvents);
+            
+            // Comparison modal
+            compareBtn.addEventListener('click', () => {
+                comparisonModal.style.display = 'block';
+                document.body.style.overflow = 'hidden';
+                document.body.style.paddingRight = '15px'; // Prevent content shift from scrollbar
+            });
+            
+            closeModal.addEventListener('click', () => {
+                comparisonModal.style.display = 'none';
+                document.body.style.overflow = 'auto';
+                document.body.style.paddingRight = '';
+            });
+            
+            compareSubmit.addEventListener('click', () => {
+                comparePeriods(comparePeriod1.value, comparePeriod2.value);
+            });
+            
+            // Close modal when clicking outside
+            window.addEventListener('click', (e) => {
+                if (e.target === comparisonModal) {
+                    comparisonModal.style.display = 'none';
+                    document.body.style.overflow = 'auto';
+                    document.body.style.paddingRight = '';
+                }
+            });
+            
+            // Mobile menu toggle
+            mobileMenuBtn.addEventListener('click', () => {
+                const isExpanded = mobileMenuBtn.getAttribute('aria-expanded') === 'true';
+                mobileMenuBtn.setAttribute('aria-expanded', !isExpanded);
+                navMenu.classList.toggle('active');
+            });
+            
+            // Smooth scrolling for navigation links
+            document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+                anchor.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    
+                    const targetId = this.getAttribute('href');
+                    const targetElement = document.querySelector(targetId);
+                    
+                    if (targetElement) {
+                        targetElement.scrollIntoView({
+                            behavior: 'smooth',
+                            block: 'start'
+                        });
+                        
+                        // Close mobile menu if open
+                        if (navMenu.classList.contains('active')) {
+                            mobileMenuBtn.setAttribute('aria-expanded', 'false');
+                            navMenu.classList.remove('active');
+                        }
+                    }
+                });
+            });
+            
+            // Add keyboard navigation to timeline
+            timelineScroll.addEventListener('keydown', (e) => {
+                if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') {
+                    e.preventDefault();
+                    const scrollAmount = e.key === 'ArrowLeft' ? -200 : 200;
+                    timelineScroll.scrollBy({ left: scrollAmount, behavior: 'smooth' });
+                }
+            });
+        }
+
+        // Initialize the application when DOM is loaded
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>

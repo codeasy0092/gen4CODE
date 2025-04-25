@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Indus Valley Civilization</title>
+  <link rel="stylesheet" href="styles.css" />
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Cinzel&display=swap');
+
+    body {
+      font-family: 'Cinzel', serif;
+      background: linear-gradient(to bottom, #f4efe5, #e8ddcc);
+      color: #2e2e2e;
+      margin: 0;
+      padding: 0;
+      overflow-x: hidden;
+    }
+
+    header {
+      background: linear-gradient(to right, #7a5c3c, #a68b6d);
+      color: white;
+      padding: 2.5rem 1rem;
+      text-align: center;
+      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.3);
+    }
+
+    header h1 {
+      font-size: 3rem;
+      margin: 0.2rem 0;
+      animation: fadeInDown 1s ease-in-out;
+    }
+
+    header p {
+      font-size: 1.3rem;
+      margin-top: 0.5rem;
+      animation: fadeInUp 1.5s ease-in-out;
+    }
+
+    main {
+      padding: 2rem;
+      max-width: 960px;
+      margin: auto;
+    }
+
+    section {
+      margin-bottom: 4rem;
+      background-color: #ffffffd9;
+      padding: 1.8rem;
+      border-radius: 15px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+      animation: fadeIn 1s ease forwards;
+    }
+
+    section:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 12px 32px rgba(0, 0, 0, 0.2);
+    }
+
+    img {
+      width: 100%;
+      max-width: 700px;
+      display: block;
+      margin: 2rem auto 1rem;
+      border-radius: 20px;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+      transition: transform 0.4s ease, box-shadow 0.4s ease;
+      animation: zoomIn 1.2s ease;
+    }
+
+    img:hover {
+      transform: scale(1.05);
+      box-shadow: 0 14px 36px rgba(0, 0, 0, 0.3);
+    }
+
+    .image-caption {
+      text-align: center;
+      font-size: 1rem;
+      color: #5c5c5c;
+      font-style: italic;
+      margin-bottom: 1.5rem;
+    }
+
+    h2 {
+      font-size: 2rem;
+      color: #6b4e2f;
+      border-bottom: 2px solid #b19a7d;
+      padding-bottom: 0.4rem;
+      margin-top: 0;
+    }
+
+    p {
+      font-size: 1.1rem;
+      line-height: 1.85;
+    }
+
+    footer {
+      background-color: #7a5c3c;
+      color: white;
+      text-align: center;
+      padding: 1.2rem;
+      font-size: 0.95rem;
+      box-shadow: 0 -2px 12px rgba(0, 0, 0, 0.1);
+    }
+
+    .timeline {
+      display: flex;
+      overflow-x: auto;
+      padding: 1rem;
+      gap: 2rem;
+      background-color: #fdf6ec;
+      border-radius: 12px;
+      scroll-behavior: smooth;
+    }
+
+    .timeline-event {
+      min-width: 180px;
+      flex-shrink: 0;
+      background-color: #fff9f2;
+      border-left: 5px solid #7a5c3c;
+      padding: 1rem;
+      border-radius: 10px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      transition: transform 0.3s ease;
+    }
+
+    .timeline-event:hover {
+      transform: scale(1.05);
+    }
+
+    .timeline-event h3 {
+      margin: 0 0 0.5rem 0;
+      color: #6b4e2f;
+      font-size: 1.2rem;
+    }
+
+    .timeline-event p {
+      font-size: 0.95rem;
+      color: #333;
+    }
+
+    /* Animations */
+    @keyframes fadeIn {
+      from {opacity: 0; transform: translateY(20px);}
+      to {opacity: 1; transform: translateY(0);}
+    }
+
+    @keyframes fadeInDown {
+      from {opacity: 0; transform: translateY(-30px);}
+      to {opacity: 1; transform: translateY(0);}
+    }
+
+    @keyframes fadeInUp {
+      from {opacity: 0; transform: translateY(30px);}
+      to {opacity: 1; transform: translateY(0);}
+    }
+
+    @keyframes zoomIn {
+      from {opacity: 0; transform: scale(0.8);}
+      to {opacity: 1; transform: scale(1);}
+    }
+  </style>
+</head>
+
+<body>
+  <header>
+    <h1>The Indus Valley Civilization</h1>
+    <p>An Ancient Marvel of Urban Planning and Culture (c. 3300 – 1300 BCE)</p>
+  </header>
+  <main>
+    <section>
+      <h2>Overview</h2>
+      <p>
+        The Indus Valley Civilization (IVC) was one of the world's earliest urban civilizations,
+        flourishing in the northwestern regions of South Asia. It is known for its sophisticated cities,
+        advanced drainage systems, and impressive architecture.
+      </p>
+      <img src="indus-map.jpg" alt="Map of Indus Valley Civilization">
+      <div class="image-caption">Map showing the spread of the Indus Valley Civilization</div>
+    </section>
+
+    <section>
+      <h2>Interactive Timeline</h2>
+      <div class="timeline">
+        <div class="timeline-event">
+          <h3>3300 BCE</h3>
+          <p>Early Harappan phase begins with agricultural settlements.</p>
+        </div>
+        <div class="timeline-event">
+          <h3>2600 BCE</h3>
+          <p>Major cities like Harappa and Mohenjo-Daro emerge.</p>
+        </div>
+        <div class="timeline-event">
+          <h3>2500 BCE</h3>
+          <p>Peak of urban planning and trade networks with Mesopotamia.</p>
+        </div>
+        <div class="timeline-event">
+          <h3>1900 BCE</h3>
+          <p>Gradual decline begins; cultural shifts observed.</p>
+        </div>
+        <div class="timeline-event">
+          <h3>1300 BCE</h3>
+          <p>Final traces of the Indus Valley Civilization fade.</p>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <h2>Architecture and Urban Planning</h2>
+      <p>
+        The cities were laid out in a grid pattern with sophisticated drainage and sewage systems.
+        Buildings were constructed using baked bricks, and public structures like the Great Bath in Mohenjo-Daro
+        show evidence of communal religious or ritual activities.
+      </p>
+      <img src="images/great-bath.jpg" alt="Great Bath of Mohenjo-Daro">
+      <div class="image-caption">The Great Bath - A symbol of urban design and possible ritual use</div>
+    </section>
+
+    <section>
+      <h2>Culture and Daily Life</h2>
+      <p>
+        The Indus people were skilled artisans and traders. They produced a variety of goods such as pottery,
+        beads, and seals, which were traded locally and with distant civilizations like Mesopotamia.
+      </p>
+      <img src="images/indus-seals.jpg" alt="Indus Seals">
+      <div class="image-caption">Seals bearing inscriptions and animal motifs - clues to language and trade</div>
+    </section>
+
+    <section>
+      <h2>Language and Scripts</h2>
+      <p>
+        The Indus script remains undeciphered. The symbols on seals and pottery may represent a proto-writing system.
+      </p>
+      <img src="images/indus-script.jpg" alt="Indus Script">
+      <div class="image-caption">Examples of the undeciphered Indus script</div>
+    </section>
+
+    <section>
+      <h2>Decline and Legacy</h2>
+      <p>
+        Around 1900 BCE, the civilization began to decline. Despite its fall, the legacy of the Indus Valley
+        Civilization continues to influence Indian culture and urban planning.
+      </p>
+      <img src="images/indus-ruins.jpg" alt="Ruins of Harappa">
+      <div class="image-caption">Ruins of Harappa - remnants of a once-thriving civilization</div>
+    </section>
+  </main>
+
+  <footer>
+    <p>&copy; 2025 Indus History Project | All images are for educational use</p>
+  </footer>
+</body>
+
+</html>
